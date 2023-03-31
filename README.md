@@ -2,7 +2,7 @@
 
 ------
 
-The amplisscop packege visualizes variation in amplicon sequencing data. It kades raw sequencing reads in fastq format and a list of amplicon primers and generates plots and alignments showing the sequence variation present in the data for each amplicon.
+The ampliscope packege visualizes variation in amplicon sequencing data. It kades raw sequencing reads in fastq format and a list of amplicon primers and generates plots and alignments showing the sequence variation present in the data for each amplicon.
 
 ## Table of Contents
 - [Features](#features)
@@ -46,11 +46,12 @@ The individual pipeline steps are:
 ![ampliscope_flowchart](EMX1_visualization.png)
 
 ## Dependencies<a name="dependencies"></a>
-* Python (2.7)
-* Reference genome fasta file ([Example](http://www.broadinstitute.org/ftp/pub/seq/references/Homo_sapiens_assembly19.fasta))
-* [`bwa`](<http://bio-bwa.sourceforge.net/>) alignment tool
-* [`bedtools`](<http://bedtools.readthedocs.org/en/latest/>) genome arithmetic utility
-
+* Perl
+* [`emboss`](<http://bio-bwa.sourceforge.net/>) alignment tool
+* [`R`](<http://bedtools.readthedocs.org/en/latest/>) genome arithmetic utility
+* [`ncbi_blast+`](<http://bedtools.readthedocs.org/en/latest/>) alignment tool
+* [`pear`](<http://bedtools.readthedocs.org/en/latest/>) Paired-end read meger
+* [`mview`](<http://bedtools.readthedocs.org/en/latest/>) Multiple sequence alignment visualization
 
 ## Getting Set Up<a name="setup"></a>
 
