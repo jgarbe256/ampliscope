@@ -90,3 +90,7 @@ No, the pipeline does not support UMIs.
 ### What if my data is already demultiplexed and I have many fastq files, each containing reads for one amplicon?
 
 Ampliscope isn't designed to directly handle this situation. You can combine all of your samples into a single pair of fastq files and then run Ampliscope.
+
+### I'm having trouble running ampliscope
+
+Ampliscope is provided as-is without support. You can <a href="https://github.com/jgarbe256/ampliscope/issues/new">create an issue</a> if you would like to report your problem.
