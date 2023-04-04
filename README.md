@@ -36,7 +36,7 @@ Install the following dependencies:
 * [`pandoc`](<https://pandoc.org>) Document converter
 * [`GNU Parallel`](<https://www.gnu.org/software/parallel/>) Parallel job execution
 
-Obtain a copy of the ampliscope package source code. You can either download and unzip the latest source from the github [release page](https://github.com/aryeelab/ampliscope/releases), or you use git to clone the repository by running `git clone --recursive https://github.com/jgarbe/ampliscope.git`
+Obtain a copy of the ampliscope package source code. You can either download and unzip the latest source from the github [release page](https://github.com/jgarbe/ampliscope/releases), or you use git to clone the repository by running `git clone --recursive https://github.com/jgarbe/ampliscope.git`
 
 
 ### Running Ampliscope<a name="running_ampliscope"></a>
@@ -44,12 +44,12 @@ Obtain a copy of the ampliscope package source code. You can either download and
 Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and (optionally) the expected length of the amplicon. The file should be tab-delimited plain text:
 
 ```
-amplicon_01	ACAACGTTAGCCTGTT GTTGATATCCCACCCGAA	47
-amplicon_17	CCAAAAACAACAGTCA ATGGTGCCATTCTCCTT	115
-ldlr_1a	TTATCTGCTTGCTTCTGC	 ACTCCTGCAGGTCACTG	163
-ldlr1b	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
-chr17-156890-v1	AGCCGGGACCACCT	TGGAGGTGAGGGAGAGG	240
-chr17-156890-alt	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
+amplicon_01	ACAACGTTAGCCTGTT	GTTGATATCCCACCCGAA	47
+amplicon_17	CCAAATGGAACAACAGTCA	ATGGTGCCATTCTCCTT	115
+ldlr_ios1	TTATCTGCTTGCTTCTGC	ACTCCTGCAGGTCACTG	163
+ldlr_iso2	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
+chr17-156890	AGCTACGGGACCACCT	TGGAGGTGAGGGAGAGG	240
+chr7-89274829	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
 ```
 
 Run ampliscope:
