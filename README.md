@@ -43,12 +43,12 @@ Obtain a copy of the ampliscope package source code. You can either download and
 
 Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and (optionally) the expected length of the amplicon. The file should be tab-delimited plain text:
 
->amplicon_01	ACAACGTTAGCCTGTT GTTGATATCCCACCCGAA	47
->amplicon_17	CCAAAAACAACAGTCA ATGGTGCCATTCTCCTT	115
->ldlr_1a	TTATCTGCTTGCTTCTGC	 ACTCCTGCAGGTCACTG	163
->ldlr1b	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
->chr17-156890-v1	AGCCGGGACCACCT	TGGAGGTGAGGGAGAGG	240
->chr17-156890-alt	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
+  amplicon_01	ACAACGTTAGCCTGTT GTTGATATCCCACCCGAA	47
+  amplicon_17	CCAAAAACAACAGTCA ATGGTGCCATTCTCCTT	115
+  ldlr_1a	TTATCTGCTTGCTTCTGC	 ACTCCTGCAGGTCACTG	163
+  ldlr1b	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
+  chr17-156890-v1	AGCCGGGACCACCT	TGGAGGTGAGGGAGAGG	240
+  chr17-156890-alt	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
 
 Run ampliscope:
 
@@ -57,12 +57,6 @@ ampliscope.pl --threads 10 primers.txt sample_R1.fastq.gz sample_R2.fastq.gz
 ```
 
 Ampliscope options:
-
-    This pipeline only handles paired-end reads. Fastq files may be gz
-    compressed.
-
-    Options:
-
      --help : Print usage instructions and exit
      --verbose : Print more information while running
      --outputfolder string : output folder name (ampliscope-SAMPLENAME)
