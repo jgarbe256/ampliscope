@@ -41,7 +41,7 @@ Obtain a copy of the ampliscope package source code. You can either download and
 
 ### Running Ampliscope<a name="running_ampliscope"></a>
 
-Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and (optionally) the expected length of the amplicon. The file should be tab-delimited plain text:
+Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and the expected length of the amplicon. The file should be tab-delimited plain text:
 
 ```
 amplicon_01	ACAACGTTAGCCTGTT	GTTGATATCCCACCCGAA	47
