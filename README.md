@@ -17,12 +17,12 @@ Ampliscope requires paired-end sequence data whose reads overlap at least 10bp t
 
 Ampliscope implements the following analysis steps:
 
-1: Overlapping read-pairs were assembled with Pear, non-overlapping read-pairs and assembled reads shorter than --minlength are discarded. 
-2: Reads are demultiplexed by amplicon based on exact matches to amplicon primer sequences. Reads with an assembled length 10bp longer or shorter than the expected length of the amplicon were discarded. 
-3: For each amplicon the stitched reads are deduplicated into a list of unique sequences, with a count of the number of reads seen for each sequence. Sequences with a read count less than 1 were discarded. The most abundant sequence is selected to be the reference sequence for the amplicon. 
-4: The 10 most common amplicon reads are aligned to the reference amplicon sequence with the mafft multiple sequence aligner, and a visualization of the alignments is generated with MView
-5: Needle (Emboss package) is used to generate optimal global sequence alignments between each amplicon sequence and the amplicon reference sequence. 
-6: The needle alignments are parsed and the numbers of insertions, deletions, and substitutions at each base of the reference amplicon sequence are counted and plots summarizing the counts are generated.
+1. Overlapping read-pairs were assembled with Pear, non-overlapping read-pairs and assembled reads shorter than --minlength are discarded. 
+2. Reads are demultiplexed by amplicon based on exact matches to amplicon primer sequences. Reads with an assembled length 10bp longer or shorter than the expected length of the amplicon were discarded. 
+3. For each amplicon the stitched reads are deduplicated into a list of unique sequences, with a count of the number of reads seen for each sequence. Sequences with a read count less than 1 were discarded. The most abundant sequence is selected to be the reference sequence for the amplicon. 
+4. The 10 most common amplicon reads are aligned to the reference amplicon sequence with the mafft multiple sequence aligner, and a visualization of the alignments is generated with MView
+5. Needle (Emboss package) is used to generate optimal global sequence alignments between each amplicon sequence and the amplicon reference sequence. 
+6. The needle alignments are parsed and the numbers of insertions, deletions, and substitutions at each base of the reference amplicon sequence are counted and plots summarizing the counts are generated.
 
 ## Installation<a name="installation"></a>
 
@@ -43,12 +43,14 @@ Obtain a copy of the ampliscope package source code. You can either download and
 
 Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and (optionally) the expected length of the amplicon. The file should be tab-delimited plain text:
 
-  amplicon_01	ACAACGTTAGCCTGTT GTTGATATCCCACCCGAA	47
-  amplicon_17	CCAAAAACAACAGTCA ATGGTGCCATTCTCCTT	115
-  ldlr_1a	TTATCTGCTTGCTTCTGC	 ACTCCTGCAGGTCACTG	163
-  ldlr1b	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
-  chr17-156890-v1	AGCCGGGACCACCT	TGGAGGTGAGGGAGAGG	240
-  chr17-156890-alt	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
+```
+amplicon_01	ACAACGTTAGCCTGTT GTTGATATCCCACCCGAA	47
+amplicon_17	CCAAAAACAACAGTCA ATGGTGCCATTCTCCTT	115
+ldlr_1a	TTATCTGCTTGCTTCTGC	 ACTCCTGCAGGTCACTG	163
+ldlr1b	TTGTTAGGATGGTGGA	CAGGGCCTTTCCTCGC	81
+chr17-156890-v1	AGCCGGGACCACCT	TGGAGGTGAGGGAGAGG	240
+chr17-156890-alt	GGCCCGACTTGCAACTA	CTACCGGAGACGTGTCA	173
+```
 
 Run ampliscope:
 
@@ -57,6 +59,7 @@ ampliscope.pl --threads 10 primers.txt sample_R1.fastq.gz sample_R2.fastq.gz
 ```
 
 Ampliscope options:
+
      --help : Print usage instructions and exit
      --verbose : Print more information while running
      --outputfolder string : output folder name (ampliscope-SAMPLENAME)
