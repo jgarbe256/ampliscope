@@ -2,7 +2,7 @@
 
 ------
 
-The ampliscope packege visualizes variation in amplicon sequencing data. It takes raw sequencing reads in fastq format and a list of amplicon primers and generates plots and alignments showing the sequence variation present in the data for each amplicon.
+The ampliscope package visualizes variation in amplicon sequencing data. It takes raw sequencing reads in fastq format and a list of amplicon primers and generates plots and alignments showing the sequence variation present in the data for each amplicon.
 
 ## Table of Contents
 - [Overview](#overview)
