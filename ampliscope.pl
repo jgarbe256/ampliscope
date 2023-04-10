@@ -29,6 +29,7 @@ Options:
  --revcomp : Reverse complement the second column of primer sequences
  --printlimit integer : # how many unique inserts to print out (10)
  --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
+ --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
 
 =cut
 
@@ -48,6 +49,7 @@ $args{verbose} = '';
 $args{pearmin} = 10;
 $args{printlimit} = 10;
 $args{dimerlength} = 10;
+$args{minidentity} = 0;
 GetOptions("help" => \$args{help},
 	   "verbose" => \$args{verbose},
 	   "threads=i" => \$args{threads},
@@ -57,6 +59,7 @@ GetOptions("help" => \$args{help},
 	   "revcomp" => \$args{revcomp},
 	   "printlimit=i" => \$args{printlimit},
 	   "dimerlength=i" => \$args{dimerlength},
+	   "minidentity=i" => \$args{minidentity},
     ) or pod2usage;
 pod2usage(-verbose => 99, -sections => [qw(DESCRIPTION|SYNOPSIS|OPTIONS)]) if ($args{help});
 
@@ -156,7 +159,7 @@ foreach $fa (@fas) {
 	print STDERR "Skipping file with no sequences: $fa\n";
 	next;
     }
-    print OFILE "align-parse.pl -v $fa\n";
+    print OFILE "align-parse.pl -i $args{minidentity} -v $fa\n";
 }
 close OFILE;
 `cat $commandfile | parallel -j $args{threads}`;
@@ -226,9 +229,8 @@ for $metric (1..$#metrics) {
 
 open RFILE, ">$rfile" or die "Cannot open $rfile\n";
 print RFILE qq(
-<div class="plottitle">$title
-<a href="#$name" class="icon" data-toggle="collapse"><i class="fa fa-question-circle" aria-hidden="true" style="color:grey;font-size:75%;"></i></a></div>
-<div id="$name" class="collapse">
+<b>$title</b>
+<div id="$name">
 $text
 </div>
 

@@ -16,18 +16,19 @@
 use Getopt::Std;
 
 $usage = "USAGE: align-parse.pl sample.fa\n";
-die $usage unless getopts('hv');
+die $usage unless getopts('hvi:');
 die $usage unless ($#ARGV == 0);
 die $usage if ($opt_h);
 $verbose = $opt_v // 0;
 
-our ($opt_v, $opt_h);
+our ($opt_v, $opt_h, $opt_i);
 
-die "USAGE: align-parse.pl inserts.fasta > counts.txt\n" unless ($#ARGV == 0);
+die "USAGE: align-parse.pl [-i .95] inserts.fasta > counts.txt\n" unless ($#ARGV == 0);
 
 $sensitivitylimit = 0.1; # smallest percent that gets drawn on log-scale plot
 
 # set up reference sequence
+$args{minidentity} = $opt_i // 0;
 $ifile = $ARGV[0];
 print STDERR "Processing $ifile\n" if ($verbose);
 $inserts = `wc -l < $ifile`;
@@ -70,9 +71,9 @@ for $i (1..$inserts-1) {
     }
 
     # ignore sequences dissimilar to ref
-#    $identity = `grep Identity $afile`;
-#    $identity =~ /\((\d+\.\d+)\%\)/;
-#    next if ($1 < 95);
+    $identity = `grep Identity $afile`;
+    $identity =~ /\((\d+\.\d+)\%\)/;
+    next if ($1 < $args{minidentity});
 
     # grab the count from the ID line
     $header = `head -n 1 $altfa`;
