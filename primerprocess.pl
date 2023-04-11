@@ -239,7 +239,7 @@ for $barcode ( sort keys %barcodes ) {
     $insertcount = 0;
     $addnewline = 0;
     $othercount = 0;
-    $ofile = $barcode . ".fa";
+    $ofile = $barcode . ".demux.fa";
     open OFILE, ">$ofile" or die "Cannot open output file $ofile\n";
 #    print STDERR "amplicon\tinsert length\tinsert count\tinsert sequence\n";
     for $insert ( sort { $inserts{$barcode}{$b} <=> $inserts{$barcode}{$a} } keys %{ $inserts{$barcode} } ) {
@@ -273,30 +273,6 @@ for $barcode ( sort { $badbarcodes{$b} <=> $badbarcodes{$a} } keys %badbarcodes 
 close OFILE;
 $text = `cat $ofile`;
 print STDERR $text if ($args{verbose});
-
-# align on all fasta files and generate alignment views
-print STDERR "Generating html alignments:\n";
-$commandfile = "html-alignments-commands.txt";
-open OFILE, ">$commandfile" or die "cannot open $commandfile: $!\n";
-for $barcode ( sort keys %barcodes ) {
-    $file = $barcode . ".fa";
-    $lines = `wc -l < $file`;
-    chomp $lines;
-    if ($lines == 0) {
-	print STDERR "Skipping file with no sequences: $file\n";
-	next;
-    }
-    print OFILE "mafft --globalpair  $file > $file.aln 2> $file.aln.log && mview -in pearson -out new -html head -css on -coloring identity -ruler on -moltype dna $file.aln > $file.html\n";
-}
-close OFILE;
-`which parallel`;
-if ($?) {
-    `cat $commandfile | xargs -L 1 -I CMD -P $args{threads} bash -c CMD`;
-} else {
-    `cat $commandfile | parallel -j $args{threads}`;
-}
-
-die "Error: mafft and/or mview failed on one or more amplicons. Take a look at *.aln.log files" if ($?);
 
 ########################### helper subs #################################
 

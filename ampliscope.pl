@@ -150,36 +150,63 @@ if ($?) {
 print STDERR "Generating variation plots with align-parse.pl:\n";
 $commandfile = "align-parse-commands.txt";
 open OFILE, ">$commandfile" or die "cannot open $commandfile: $!\n";
-@fas = `ls *.fa`;
-foreach $fa (@fas) {
-    chomp $fa;
-    $lines = `wc -l < $fa`;
+@fas = `ls *.demux.fa`;
+foreach $file (@fas) {
+    chomp $file;
+    $lines = `wc -l < $file`;
     chomp $lines;
     if ($lines == 0) {
-	print STDERR "Skipping file with no sequences: $fa\n";
+	print STDERR "Skipping file with no sequences: $file\n";
 	next;
     }
-    print OFILE "align-parse.pl -i $args{minidentity} -v $fa\n";
+    print OFILE "align-parse.pl -i $args{minidentity} -v $file\n";
 }
 close OFILE;
 `cat $commandfile | parallel -j $args{threads}`;
 # TODO: add xargs alternative to parallel
+# TODO: count how many reads were discarded
+
+# align on all fasta files and generate alignment views
+print STDERR "Generating html alignments:\n";
+$commandfile = "html-alignments-commands.txt";
+open OFILE, ">$commandfile" or die "cannot open $commandfile: $!\n";
+@fas = `ls *.good.fa`;
+foreach $file (@fas) {
+    chomp $file;
+    $lines = `wc -l < $file`;
+    $name = $file;
+    $name =~ s/\.good\.fa//;
+    chomp $lines;
+    if ($lines == 0) {
+	print STDERR "Skipping file with no sequences: $file\n";
+	next;
+    }
+    print OFILE "mafft --globalpair  $file > $file.aln 2> $file.aln.log && mview -in pearson -out new -html head -css on -coloring identity -ruler on -moltype dna $file.aln > $name.html\n";
+}
+close OFILE;
+`which parallel`;
+if ($?) {
+    `cat $commandfile | xargs -L 1 -I CMD -P $args{threads} bash -c CMD`;
+} else {
+    `cat $commandfile | parallel -j $args{threads}`;
+}
+
+die "Error: mafft and/or mview failed on one or more amplicons. Take a look at *.aln.log files" if ($?);
 
 ### Generate html index ###
 print STDERR "Generating html index...\n";
-$ofile = "$samplename.html";
+$ofile = "../$samplename.html";
 open OFILE, ">$ofile" or die "cannot open output file $ofile: $!\n";
-@fas = `ls *.fa`;
 foreach $fa (sort hdsort @fas) {
     chomp $fa;
     $name = $fa;
-    $name =~ s/\.fa$//;
+    $name =~ s/\.good\.fa//;
     if (-e "$name.totalcount") {
 	$totalcount = `cut -f 2 $name.totalcount | head`;
 	chomp $totalcount;
-	$png = "$fa.png";
+	$png = "$name.png";
 	print OFILE "<img src=\"png\\$png\"><br>\n";
-	$html = "$fa.html";
+	$html = "$name.html";
 	print OFILE "<a href=\"html\\$html\">$name</a> $totalcount reads<br>\n";
     } else {
 	print OFILE "$name 0 reads<br>\n";
@@ -187,19 +214,18 @@ foreach $fa (sort hdsort @fas) {
 }
 
 # log-scale version
-$ofile = "$samplename-log.html";
+$ofile = "../$samplename-log.html";
 open OFILE, ">$ofile" or die "cannot open output file $ofile: $!\n";
-@fas = `ls *.fa`;
 foreach $fa (sort hdsort @fas) {
     chomp $fa;
     $name = $fa;
-    $name =~ s/\.fa$//;
+    $name =~ s/\.good\.fa$//;
     if (-e "$name.totalcount") {
 	$totalcount = `cut -f 2 $name.totalcount | head`;
 	chomp $totalcount;
-	$png = "$fa-log.png";
+	$png = "$name-log.png";
 	print OFILE "<img src=\"png\\$png\"><br>\n";
-	$html = "$fa.html";
+	$html = "$name.html";
 	print OFILE "<a href=\"html\\$html\">$name</a> $totalcount reads<br>\n";
     } else {
 	print OFILE "$name 0 reads<br>\n";
@@ -305,7 +331,7 @@ Overlapping read-pairs were assembled with Pear, non-overlapping read-pairs and 
 );
 
 # render report into html
-$result = `Rscript -e \"library('rmarkdown'); render('$reportfile', output_format='html_document', output_file='report.html')\" 2>&1`; 
+$result = `Rscript -e \"library('rmarkdown'); render('$reportfile', output_format='html_document', output_file='../report.html')\" 2>&1`; 
 if ($?) {
     print STDERR "Error generating report: $result\n";
 } else {
@@ -319,9 +345,7 @@ if ($?) {
 `mv *.png ../png`;
 
 `mkdir ../html` unless (-e "../html");;
-`mv *.fa.html ../html`;
-
-`mv *.html ../`;
+`mv *.html ../html`;
 
 `mkdir ../fa` unless (-e "../fa");
 `mv *.fa ../fa`;

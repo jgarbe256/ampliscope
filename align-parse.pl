@@ -31,6 +31,10 @@ $sensitivitylimit = 0.1; # smallest percent that gets drawn on log-scale plot
 $args{minidentity} = $opt_i // 0;
 $ifile = $ARGV[0];
 print STDERR "Processing $ifile\n" if ($verbose);
+$ofile = $ifile;
+$ofile =~ s/demux\.fa/good\.fa/;
+$badfile = $ifile;
+$badfile =~ s/demux\.fa/bad\.fa/;
 $inserts = `wc -l < $ifile`;
 chomp $inserts;
 ($inserts) = split ' ', $inserts; 
@@ -48,6 +52,7 @@ $reftrimid = $line[0];
 $refseq = `tail -n 1 $reffa`;
 chomp $refseq;
 @refseq = split "", $refseq;
+`cat $reffa > $ofile`;
 
 # initialize counts to zero
 #for $i (0..2) {
@@ -73,7 +78,11 @@ for $i (1..$inserts-1) {
     # ignore sequences dissimilar to ref
     $identity = `grep Identity $afile`;
     $identity =~ /\((\d+\.\d+)\%\)/;
-    next if ($1 < $args{minidentity});
+    if ($1 < $args{minidentity}) {
+	`cat $altfa >> $badfile`;
+	next 
+    }
+    `cat $altfa >> $ofile`;
 
     # grab the count from the ID line
     $header = `head -n 1 $altfa`;
@@ -210,6 +219,9 @@ close OFILE;
 ## Plotting ###
 $ofile = $datfile;
 $rfile = "$ifile.r";
+$name = $ifile;
+$name =~ s/\.demux\.fa//;
+
 my $height = 480;
 my $width = 2000;
 
@@ -220,16 +232,16 @@ open RFILE, ">$rfile" or die "Cannot open $rfile\n";
 print RFILE qq(
   library(ggplot2);
   datat <- read.table("$ofile", header=T, colClasses=c("Base"="factor"));
-  png(filename="$ifile.png", height = $height, width = $width);
+  png(filename="$name.png", height = $height, width = $width);
 
   p <- ggplot(datat, aes(x=Base, y=Value))
-  p + geom_bar(stat='identity', fill="red") + ylim(0,100) + xlab("Sequence") + ylab("Percent") + theme(legend.position="top") + theme(legend.title=element_blank()) + facet_wrap(~ Type, ncol = 1) + scale_x_discrete(labels=c($labels), limits=c($limits)) + theme(text = element_text(size = 20)) + theme(axis.text.x=element_text(size=7)) + labs(x="$ifile");
+  p + geom_bar(stat='identity', fill="red") + ylim(0,100) + xlab("Sequence") + ylab("Percent") + theme(legend.position="top") + theme(legend.title=element_blank()) + facet_wrap(~ Type, ncol = 1) + scale_x_discrete(labels=c($labels), limits=c($limits)) + theme(text = element_text(size = 20)) + theme(axis.text.x=element_text(size=7)) + labs(x="$name");
   dev.off();
 
-  png(filename="$ifile-log.png", height = $height, width = $width);
+  png(filename="$name-log.png", height = $height, width = $width);
   datat\$Value[datat\$Value < $sensitivitylimit] <- $sensitivitylimit
   p <- ggplot(datat, aes(x=Base)) 
-  p + geom_linerange(aes(ymax=Value, ymin=$sensitivitylimit), size=2, color="red") + scale_y_log10(limits=c($sensitivitylimit,100), breaks=c(.1,.5,1,5,10,50,100)) + xlab("Sequence") + ylab("Percent") + theme(legend.position="top") + theme(legend.title=element_blank()) + facet_wrap(~ Type, ncol = 1) + scale_x_discrete(labels=c($labels), limits=c($limits)) + theme(axis.text.x=element_text(size=7)) + labs(x="$ifile");
+  p + geom_linerange(aes(ymax=Value, ymin=$sensitivitylimit), size=2, color="red") + scale_y_log10(limits=c($sensitivitylimit,100), breaks=c(.1,.5,1,5,10,50,100)) + xlab("Sequence") + ylab("Percent") + theme(legend.position="top") + theme(legend.title=element_blank()) + facet_wrap(~ Type, ncol = 1) + scale_x_discrete(labels=c($labels), limits=c($limits)) + theme(axis.text.x=element_text(size=7)) + labs(x="$name");
 
   dev.off();
   #eof");
