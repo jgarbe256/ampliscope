@@ -49,6 +49,7 @@ $refid =~ s/^>//;
 @line = split /:/, $refid;
 $refcount = pop @line;
 $reftrimid = $line[0];
+$reftrimid =~ s/-ref$//;
 $refseq = `tail -n 1 $reffa`;
 chomp $refseq;
 @refseq = split "", $refseq;
@@ -77,7 +78,8 @@ for $i (1..$inserts-1) {
 
     # ignore sequences dissimilar to ref
     $identity = `grep Identity $afile`;
-    $identity =~ /\((\d+\.\d+)\%\)/;
+    print STDERR "$afile identity: $identity\n";
+    $identity =~ /\(\s?(\d+\.\d+)\%\)/;
     if ($1 < $args{minidentity}) {
 	`cat $altfa >> $badfile`;
 	next 
@@ -184,17 +186,24 @@ for $j (0..$#refseq) {
     $count[$j]{intotal} = $count[$j]{intotal} // 0;
     $count[$j]{deltotal} = $count[$j]{deltotal} // 0;
     $count[$j]{subtotal} = $count[$j]{subtotal} // 0;
-    $inpercent = &round1000($count[$j]{intotal} / $totalcount * 100);
-    $delpercent = &round1000($count[$j]{deltotal} / $totalcount * 100);
-    $subpercent = &round1000($count[$j]{subtotal} / $totalcount * 100);
-
+    if ($totalcount) { # avoid divide by zero
+	$inpercent = &round1000($count[$j]{intotal} / $totalcount * 100);
+	$delpercent = &round1000($count[$j]{deltotal} / $totalcount * 100);
+	$subpercent = &round1000($count[$j]{subtotal} / $totalcount * 100);
+    } else {
+	$inpercent = 0;
+	$delpercent = 0;
+	$subpercent = 0;
+    }
     # special for horizon: calculate percent of each type of indel 
     foreach $insertion (keys %{ $count[$j]{in} }) {
-	$pct = &round1000($count[$j]{in}{$insertion} / $totalcount * 100);
+	$pct = 0;
+	$pct = &round1000($count[$j]{in}{$insertion} / $totalcount * 100) if ($totalcount);
 	print INDELFILE "$reftrimid\t$totalcount\t$j\tIN-$insertion\t$pct\n" if ($pct > 0.001);	
     }
     foreach $deletion (keys %{ $count[$j]{del} }) {
-	$pct = &round1000($count[$j]{del}{$deletion} / $totalcount * 100);
+	$pct = 0;
+	$pct = &round1000($count[$j]{del}{$deletion} / $totalcount * 100) if ($totalcount);
 	print INDELFILE "$reftrimid\t$totalcount\t$j\tDEL-$deletion\t$pct\n" if ($pct > 0.001);	
     }
 

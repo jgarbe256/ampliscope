@@ -12,7 +12,7 @@ ampliscope.pl - Visualize variation in amplicon sequence data
 
 =head1 SYNOPSIS
 
-ampliscope.pl [--threads] [--margin 10] [--minreads 1] [--outputfolder folder] primers.txt R1.fastq R2.fastq
+ampliscope.pl [--threads] [--margin 10] [--minreads 1] [--outputfolder folder] [--referencefasta amplicon.fasta] primers.txt R1.fastq R2.fastq
 
 =head1 OPTIONS
 
@@ -30,6 +30,7 @@ Options:
  --printlimit integer : # how many unique inserts to print out (10)
  --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
  --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
+ --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
 
 =cut
 
@@ -56,6 +57,7 @@ GetOptions("help" => \$args{help},
 	   "minreads=i" => \$args{minreads},
 	   "margin=i" => \$args{margin},
 	   "outputfolder=s" => \$args{outputfolder},
+	   "referencefasta=s" => \$args{referencefasta},
 	   "revcomp" => \$args{revcomp},
 	   "printlimit=i" => \$args{printlimit},
 	   "dimerlength=i" => \$args{dimerlength},
@@ -71,6 +73,17 @@ if ($#ARGV != 2) {
 $args{primerfile} = shift @ARGV;
 $args{r1} = shift @ARGV;
 $args{r2} = shift @ARGV if (@ARGV);
+# get samplename from fastq file name
+my ($samplename) = fileparse($args{r1});
+$samplename =~ /(.*)_R1/;
+$name = $1 // "";
+if (! $name) {
+    $samplename =~ /(.*)\.fast[qa]/;
+    $name = $1 // "";
+}
+$samplename = $name || "sample";
+print STDERR "processing sample $samplename\n";
+
 die "Cannot find r1 file $args{r1}\n" unless (-e $args{r1});
 $args{r1} = abs_path($args{r1});
 if ($args{r2}) {
@@ -80,18 +93,8 @@ if ($args{r2}) {
 die "Cannot find primer file $args{primerfile}\n" unless (-e $args{primerfile});
 $args{primerfile} = abs_path($args{primerfile});
 $args{verbose} = "--verbose" if ($args{verbose});
-
-# get samplename from fastq file name
-my ($samplename) = fileparse($args{r1});
-#print "$samplename\n";
-$samplename =~ /(.*)_R1/;
-$name = $1 // "";
-if (! $name) {
-    $samplename =~ /(.*)\.fast[qa]/;
-    $name = $1 // "";
-}
-$samplename = $name || "sample";
-print STDERR "processing sample $samplename\n";
+die "Cannot find reference fasta file $args{referencefasta}\n" if ($args{referencefasta} and (! -e $args{referencefasta}));
+$args{referencefasta} = abs_path($args{referencefasta}) if ($args{referencefasta});
 
 $args{outputfolder} = "ampliscope-$samplename" unless ($args{outputfolder});
 `mkdir $args{outputfolder}` unless (-e $args{outputfolder});
@@ -140,8 +143,9 @@ die "dedup.pl failure\n" if ($?);
 print STDERR "Demultiplexing sequences by primers:\n";
 $revcomp = "";
 $revcomp = "--revcomp" if ($args{revcomp});
-print "primerprocess.pl $args{verbose} $revcomp --dimerlength $args{dimerlength} --printlimit $args{printlimit} --margin $args{margin} $args{primerfile} $dedupedfasta > $samplename.txt\n" if ($args{verbose});
-`primerprocess.pl $args{verbose} $revcomp --dimerlength $args{dimerlength} --printlimit $args{printlimit} --margin $args{margin} $args{primerfile} $dedupedfasta > $samplename.txt`;
+$referencefasta = ($args{referencefasta}) ? "--referencefasta $args{referencefasta}" : "";
+print "primerprocess.pl $args{verbose} $revcomp $referencefasta --dimerlength $args{dimerlength} --printlimit $args{printlimit} --margin $args{margin} $args{primerfile} $dedupedfasta > $samplename.txt\n" if ($args{verbose});
+`primerprocess.pl $args{verbose} $revcomp $referencefasta --dimerlength $args{dimerlength} --printlimit $args{printlimit} --margin $args{margin} $args{primerfile} $dedupedfasta > $samplename.txt`;
 if ($?) {
     die "primerprocess error\n";
 }

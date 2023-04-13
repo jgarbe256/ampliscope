@@ -35,6 +35,8 @@ Options:
  --revcomp : Reverse complement the second column of primer sequences
  --primtlimit 1000 : # how many unique inserts to print out 
  --dimerlength 10 : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer
+ --refrencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
+
 =cut
 
 
@@ -53,6 +55,7 @@ GetOptions("help" => \$args{help},
 	   "margin=i" => \$args{margin},
 	   "printlimit=i" => \$args{printlimit},
 	   "dimerlength=i" => \$args{dimerlength},
+	   "referencefasta=s" => \$args{referencefasta},
     ) or pod2usage;
 pod2usage(-verbose => 99, -sections => [qw(DESCRIPTION|SYNOPSIS|OPTIONS)]) if ($args{help});
 pod2usage unless ($#ARGV == 1);
@@ -87,6 +90,40 @@ while (<PFILE>) {
 }
 $cutout = 0;
 $cutout = 1 if ($columns == 6);
+
+# read in reference fasta file
+if ($args{referencefasta}) {
+    print STDERR "Reading in reference fasta sequences\n" if ($args{verbose});
+    %referencefasta = &fastahash($args{referencefasta});
+    # check that we have a reference for each amplicon
+    $error = 0;
+    for $barcode ( keys %barcodes ) {
+	if (defined($referencefasta{$barcode})) {
+	    # strip primer sequences off reference
+	    $seq = $referencefasta{$barcode};
+	    $qes = reverse_complement($seq);
+	    $f1 = $barcodes{$barcode}{f1};
+	    $r1 = $barcodes{$barcode}{r1};
+	    if ($seq =~ /^$f1([agctnAGCTN]+)$r1/i) {
+		$matchedseq = $seq;
+		$matchedinsert = $1;
+	    } elsif ($qes =~ /^$f1([agctnAGCTN]+)$r1/i) { # handle reverse complements
+		$matchedseq = $qes;
+		$matchedinsert = $1;
+	    } else {
+		print STDERR "Error: $barcode reference fasta doesn't match primer sequences\n";
+		$error = 1;
+		next;
+	    }
+	    $referencefasta{$barcode} = $matchedinsert;
+	    # good
+	} else {
+	    print STDERR "Error: no sequence for $barcode found in reference fasta file\n";
+	    $error = 1;
+	}
+    }
+    die if ($error);
+}
 
 # read in fasta file
 open IFILE, $args{fastafile} or die "cannot open fasta file $args{fastafile}: $!\n";
@@ -164,7 +201,7 @@ while ($id = <IFILE>) {
 		$end = $back - $front;
 		$insert = substr($matchedseq,$front,$end);
 	    } else {
-		$insert = $seq;
+		$insert = $matchedinsert;
 	    }
 	    if ($inserts{$barcode}{$insert}) { # DEBUG
 #		print "insert seq already seen: $insert\n";
@@ -241,6 +278,7 @@ for $barcode ( sort keys %barcodes ) {
     $othercount = 0;
     $ofile = $barcode . ".demux.fa";
     open OFILE, ">$ofile" or die "Cannot open output file $ofile\n";
+    print OFILE ">$barcode-ref:0\n$referencefasta{$barcode}\n" if ($args{referencefasta});
 #    print STDERR "amplicon\tinsert length\tinsert count\tinsert sequence\n";
     for $insert ( sort { $inserts{$barcode}{$b} <=> $inserts{$barcode}{$a} } keys %{ $inserts{$barcode} } ) {
 	$insertcount++;
@@ -286,4 +324,18 @@ sub reverse_complement {
 #    $revcomp =~ tr/ACGTacgt/TGCAtgca/;
     $revcomp =~ tr/ABCDGHMNRSTUVWXYabcdghmnrstuvwxy/TVGHCDKNYSAABWXRtvghcdknysaabwxr/;
     return $revcomp;
+}
+
+sub fastahash {
+    ($ifile) = @_;
+    my %h;
+    local $/ = '>';
+
+    open IFILE, $ifile or die "Cannot open fasta file $ifile: $!\n";
+
+    while (<IFILE>) {
+#	/(\w+).+?\n(.+)/s and $h{$1} = $2 or next;
+	/(.+)\n(.+)\n/s and $h{$1} = $2 or next;
+    }
+    return %h;
 }
