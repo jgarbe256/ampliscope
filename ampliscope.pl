@@ -270,7 +270,7 @@ $rfile = "$name.rmd";
 print "Generating $name\n";
 
 $title = "Amplicon Read Counts";
-$text = "Number of reads per amplicon, after read stitching. Reads are considered dimers if there are fewer than $args{dimerlength}bp between the primer sequences. Reads are considered bad length if the stitched length is $args{margin}bp longer or shorter than the expected length.";
+$text = "Number of reads per amplicon, after read stitching. Reads are considered dimers if there are fewer than $args{dimerlength}bp between the primer sequences. Reads are considered bad length if the stitched length is $args{margin}bp longer or shorter than the expected length. Reads are considered low identity if they have less than $args{minidentity} percent identity to the reference sequence.";
 @metrics = ("DimerReads", "BadLengthReads", "BadIdentity", "PassedReads");
 @metricnames = ("Dimers", "Bad Length", "Low Identity", "Passed Reads");
 $traces = "";
