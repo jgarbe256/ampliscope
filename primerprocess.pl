@@ -83,7 +83,7 @@ while (<PFILE>) {
     $r1 = &reverse_complement($r1) if ($args{revcomp});
     $barcodes{$samplename}{f1} = $f1 // "";
     $barcodes{$samplename}{r1} = $r1 // "";
-    if ($columns > 4) {
+    if ($columns > 3) {
 	$length = $line[3];
 	$barcodes{$samplename}{length} = $length - length($f1) - length($r1);
 	$checklength = 1;

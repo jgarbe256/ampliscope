@@ -64,6 +64,7 @@ chomp $refseq;
 
 # for each non-reference insert
 $totalcount = $refcount;
+$badcount = 0;
 $output = ($verbose) ? "" : "2> /dev/null";
 for $i (1..$inserts-1) {
 #for $i (1..1) { # DEBUG
@@ -76,23 +77,24 @@ for $i (1..$inserts-1) {
 	print "needle error: $result\n";
     }
 
-    # ignore sequences dissimilar to ref
-    $identity = `grep Identity $afile`;
-    print STDERR "$afile identity: $identity\n";
-    $identity =~ /\(\s?(\d+\.\d+)\%\)/;
-    if ($1 < $args{minidentity}) {
-	`cat $altfa >> $badfile`;
-	next 
-    }
-    `cat $altfa >> $ofile`;
-
     # grab the count from the ID line
     $header = `head -n 1 $altfa`;
     chomp $header;
     @line = split /:/, $header;
     $altcount = pop @line;
-    $totalcount += $altcount;
 ##    print "count: $altcount\n";
+
+    # ignore sequences dissimilar to ref
+    $identity = `grep Identity $afile`;
+    print STDERR "$afile identity: $identity\n";
+    $identity =~ /\(\s?(\d+\.\d+)\%\)/;
+    if ($1 < $args{minidentity}) {
+	$badcount += $altcount;
+	`cat $altfa >> $badfile`;
+	next 
+    }
+    $totalcount += $altcount;
+    `cat $altfa >> $ofile`;
 
     # pull the reference (subject) and alternative (query) sequence
     # out of the messy needle output
@@ -159,6 +161,7 @@ for $i (1..$inserts-1) {
 }
 
 `echo -e "$reftrimid\t$totalcount" > $reftrimid.totalcount`;
+`echo -e "$reftrimid\t$badcount" > $reftrimid.badcount`;
 
 # print out the results
 #print "Reference Insertions Deletions Mismatches\n";

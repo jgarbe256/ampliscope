@@ -236,21 +236,43 @@ foreach $fa (sort hdsort @fas) {
     }
 }
 
-# print some summary metrics: TODO: make a little report
+# print out a couple summary metrics
 print "$totalreads total reads\n";
 print "$mergedreads reads after merging with pear\n";
 $mergedreadspct = &round10($mergedreads / $totalreads * 100);
 
+# add badidentity column to demultiplex-stats.txt
+@results = `cat *.badcount`;
+foreach $result (@results) {
+    chomp $result;
+    ($amplicon, $value) = split /\t/, $result;
+    $identityvalue{$amplicon} = $value;
+}
+open IFILE, "demultiplex-stats.txt" or die "cannot open stats file: $!\n";
+open OFILE, ">ampliscope-stats.txt" or die "cannot open stats output file: $!\n";
+$header = <IFILE>;
+chomp $header;
+print OFILE "$header\tBadIdentity\n";
+while ($line = <IFILE>) {
+    chomp $line;
+    @line = split /\t/, $line;
+    $amplicon = $line[0];
+    $value = $identityvalue{$amplicon} // 0;
+    print OFILE "$line\t$value\n";
+}
+close OFILE;
+close IFILE;
+
 # create plot of reads per amplicon
 $name = "ampliconplot";
-$ofile = "demultiplex-stats.txt";
+$ofile = "ampliscope-stats.txt";
 $rfile = "$name.rmd";
 print "Generating $name\n";
 
 $title = "Amplicon Read Counts";
 $text = "Number of reads per amplicon, after read stitching. Reads are considered dimers if there are fewer than $args{dimerlength}bp between the primer sequences. Reads are considered bad length if the stitched length is $args{margin}bp longer or shorter than the expected length.";
-@metrics = ("DimerReads", "BadLengthReads", "PassedReads");
-@metricnames = ("Dimers", "Bad Length", "Passed Reads");
+@metrics = ("DimerReads", "BadLengthReads", "BadIdentity", "PassedReads");
+@metricnames = ("Dimers", "Bad Length", "Low Identity", "Passed Reads");
 $traces = "";
 for $metric (1..$#metrics) {
     $traces .= qq(%>% add_trace(y=~$metrics[$metric],  name = "$metricnames[$metric]", hovertext = paste0(datat\$sample,"<br>$metricnames[$metric] ",round(datat\$$metrics[$metric],2))) );
@@ -354,8 +376,8 @@ if ($?) {
 `mkdir ../fa` unless (-e "../fa");
 `mv *.fa ../fa`;
 
-`mkdir ../align` unless (-e "../align");;
-`mv *.aln ../align`;
+#`mkdir ../align` unless (-e "../align"); # these can stay in scratch
+#`mv *.aln ../align`;
 
 `mv unmatched-barcodes.txt ../`;
 
