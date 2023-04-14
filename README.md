@@ -69,18 +69,17 @@ ampliscope.pl --threads 10 primers.txt sample_R1.fastq.gz sample_R2.fastq.gz
 
 Ampliscope options:
 
-  --help : Print usage instructions and exit
-  --verbose : Print more information while running
-  --outputfolder string : output folder name (ampliscope-SAMPLENAME)
-  --threads integer : Number of threads/cores to use (10)
-  --margin integer : Keep sequences within +/- margin of the expected lenth (10)
-  --minreads integer : Keep sequences with at least minreads reads (1)
-  --revcomp : Reverse complement the second column of primer sequences
-  --printlimit integer : # how many unique inserts to print out (10)
-  --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
-  --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
-  --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
-
+    --help : Print usage instructions and exit
+    --verbose : Print more information while running
+    --outputfolder string : output folder name (ampliscope-SAMPLENAME)
+    --threads integer : Number of threads/cores to use (10)
+    --margin integer : Keep sequences within +/- margin of the expected lenth (10)
+    --minreads integer : Keep sequences with at least minreads reads (1)
+    --revcomp : Reverse complement the second column of primer sequences
+    --printlimit integer : # how many unique inserts to print out (10)
+    --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
+    --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
+    --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
 
 
 ### Output<a name="output"></a>
