@@ -18,7 +18,7 @@ Ampliscope requires paired-end sequence data whose reads overlap at least 10bp t
 Ampliscope implements the following analysis steps:
 
 1. Overlapping read-pairs are assembled with Pear, non-overlapping read-pairs and assembled reads shorter than --minlength are discarded. 
-2. Reads are demultiplexed by amplicon based on exact matches to amplicon primer sequences. Reads with an assembled length --margin (10bp) longer or shorter than the expected length of the amplicon were discarded. 
+2. Reads are demultiplexed by amplicon based on exact matches to amplicon primer sequences. Reads with an assembled length --margin (10bp) longer or shorter than the expected length of the amplicon are discarded (if expected lengths were provided in the primer file). 
 3. For each amplicon the stitched reads are deduplicated into a list of unique sequences, with a count of the number of reads seen for each sequence. Sequences with a read count less than --minreads (1) are discarded. The most abundant sequence is selected to be the reference sequence for the amplicon, unless --referencefasta was provided. 
 4. Needle (Emboss package) is used to generate optimal global sequence alignments between each amplicon sequence and the amplicon reference sequence. Reads with less than --minidentity (0) identity to the reference sequence are discarded.
 5. The needle alignments are parsed and the numbers of insertions, deletions, and substitutions at each base of the reference amplicon sequence are counted and plots summarizing the counts are generated.
@@ -48,7 +48,7 @@ Obtain a copy of the ampliscope package source code. You can either download and
 
 ### Running Ampliscope<a name="running_ampliscope"></a>
 
-Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and the expected length of the amplicon. The file should be tab-delimited plain text:
+Create a primer file listing the name of each amplicon, the forward and reverse primer sequences, and (optionally) the expected length of the amplicon. The file should be tab-delimited plain text:
 
 ```
 amplicon_01	ACAACGTTAGCCTGTT	GTTGATATCCCACCCGAA	47
@@ -78,9 +78,10 @@ Ampliscope options:
   --revcomp : Reverse complement the second column of primer sequences
   --printlimit integer : # how many unique inserts to print out (10)
   --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
-  --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target se\
-quences)
+  --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
   --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
+
+
 
 ### Output<a name="output"></a>
 

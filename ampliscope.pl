@@ -30,7 +30,7 @@ Options:
  --printlimit integer : # how many unique inserts to print out (10)
  --dimerlength integer : # sequences shorter than the primer lengths plus dimerlength is considered a primer dimer (10)
  --minidentity integer : Discard sequences with less than --minidentity identity to the reference sequence (default 0, set to 90 or 95 to remove off-target sequences)
- --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file. Optional.
+ --referencefasta file : fasta file containing reference amplicon sequences. Sequence names must match amplicon names in primer file.
 
 =cut
 

@@ -68,6 +68,7 @@ open PFILE, $args{primerfile} or die "Cannot open primer file $args{primerfile}\
 
 print STDERR "Reading primer file...\n";
 $primerlinecount = 0;
+$checklength = 0;
 while (<PFILE>) {
     $primerlinecount++;
     next if ($_ =~ /^#/);
@@ -78,11 +79,15 @@ while (<PFILE>) {
 
     die "Error: Primer file line $primerlinecount has " . $#line+1 . " columns, expecting $columns columns: $_\n" if ($#line+1 != $columns);
 
-    ($samplename, $f1, $r1, $length) = @line;
+    ($samplename, $f1, $r1) = @line;
     $r1 = &reverse_complement($r1) if ($args{revcomp});
     $barcodes{$samplename}{f1} = $f1 // "";
     $barcodes{$samplename}{r1} = $r1 // "";
-    $barcodes{$samplename}{length} = $length - length($f1) - length($r1);
+    if ($columns > 4) {
+	$length = $line[3];
+	$barcodes{$samplename}{length} = $length - length($f1) - length($r1);
+	$checklength = 1;
+    }
     if ($columns == 6) {
 	$barcodes{$samplename}{start} = $line[4];
 	$barcodes{$samplename}{end} = $line[5];
@@ -183,13 +188,15 @@ while ($id = <IFILE>) {
 		$primerdimerreadcount += $seqcount;
 		next;
 	    }
-	    if ((length($matchedinsert) < ($barcodes{$barcode}{length} - $args{margin})) or (length($matchedinsert) > ($barcodes{$barcode}{length} + $args{margin}))) {
-		# too short or too long;
-		$badlengthseqcount{$barcode}++;
-		$badlengthreadcount{$barcode} += $seqcount;
-		$badlengthseqcount++;
-		$badlengthreadcount += $seqcount;
-		next;
+	    if ($checklength) {
+		if ((length($matchedinsert) < ($barcodes{$barcode}{length} - $args{margin})) or (length($matchedinsert) > ($barcodes{$barcode}{length} + $args{margin}))) {
+		    # too short or too long;
+		    $badlengthseqcount{$barcode}++;
+		    $badlengthreadcount{$barcode} += $seqcount;
+		    $badlengthseqcount++;
+		    $badlengthreadcount += $seqcount;
+		    next;
+		}
 	    }
 	    if ($cutout) { # cut out a region of interest in the amplicon
 		$front = $barcodes{$barcode}{start};
