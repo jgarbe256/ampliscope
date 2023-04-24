@@ -302,11 +302,25 @@ config(plot_ly(
  name = "$metricnames[0]",
  type = "bar",
 hoverinfo="text",
-hovertext = paste0(datat\$Amplicon,"<br>$metricnames[0] ",round(datat\$$metrics[0],2),"%") ) $traces
+hovertext = paste0(datat\$Amplicon,"<br>$metricnames[0] ",round(datat\$$metrics[0],2)) ) $traces
 %>% layout(xaxis = sampleorder, dragmode='pan', legend = list(orientation = 'h'), barmode='stack', xaxis = list(title = "Sample"), yaxis = list(title = "Number of reads")), displaylogo = FALSE, modeBarButtonsToRemove = list('sendDataToCloud','toImage','autoScale2d','hoverClosestCartesian','hoverCompareCartesian','lasso2d','zoom2d','select2d','toggleSpikelines','pan2d'))
 ```
 );
 close RFILE;
+
+# create pseudogel
+@fas = `ls *.demux.fa`;
+$ofile = "pseudogel.filelist";
+open OFILE, ">$ofile" or die $!;
+foreach $file (@fas) {
+    chomp $file;
+    $lines = `wc -l < $file`;
+    $name = $file;
+    $name =~ s/\.demux\.fa//;
+    print OFILE "$file\t$name\n";
+}
+$result = `pseudogel.pl -l $ofile -d`;
+print $result if ($args{verbose});
 
 # Create report
 my $date = `date`;
@@ -343,7 +357,7 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 <b>Reads after merging:</b> $mergedreads ($mergedreadspct%)<br>
 <b>Report generated:</b> $date<br>
 
-
+```{r test-main, child = 'pseudogelplot.rmd'}\n```
 
 ```{r test-main, child = 'ampliconplot.rmd'}\n```
 
